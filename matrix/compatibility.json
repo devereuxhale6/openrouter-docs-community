@@ -1,1 +1,89 @@
-{"checked":"2026-10-07","features":{"provider":{"openrouter":"documented","argolink":"use model page and catalog"},"reasoning":{"openrouter":"provider/model dependent","argolink":"model dependent"},"prompt_caching":{"openrouter":"provider dependent","argolink":"do not assume"},"transforms":{"openrouter":"provider feature","argolink":"no equivalent claim"},"video":{"openrouter":"documented video endpoints","argolink":"native async video endpoints"}}}
+{
+  "checked": "2026-10-07",
+  "scope": "OpenRouter-specific controls compared with direct ArgoLink model contracts",
+  "sources": {
+    "provider_routing": "https://openrouter.ai/docs/features/provider-routing",
+    "prompt_caching": "https://openrouter.ai/docs/guides/best-practices/prompt-caching",
+    "response_caching": "https://openrouter.ai/docs/guides/features/response-caching",
+    "message_transforms": "https://openrouter.ai/docs/guides/features/message-transforms",
+    "video": "https://openrouter.ai/docs/guides/overview/multimodal/video-generation",
+    "argolink_catalog": "https://argolink.io/v1/models"
+  },
+  "features": {
+    "provider_routing": {
+      "openrouter": {
+        "status": "documented",
+        "details": "provider.order and provider preferences can order or constrain upstream providers; session stickiness can keep a conversation on a provider/model",
+        "migration": "choose a concrete model/base URL or implement an explicit fallback table"
+      },
+      "argolink": {
+        "status": "not_universal",
+        "details": "the model catalog is a provider API, not an OpenRouter-style cross-provider provider-order field",
+        "migration": "keep routing policy in the calling gateway and use the model page for the selected ID"
+      }
+    },
+    "reasoning": {
+      "openrouter": {
+        "status": "provider_model_dependent",
+        "details": "reasoning controls and returned usage vary by model/provider",
+        "migration": "preserve an effort only when the destination model page names it"
+      },
+      "argolink": {
+        "status": "model_dependent",
+        "details": "for example, GPT-6 Sol lists low, medium, high, xhigh, and max on the live catalog",
+        "migration": "map the exact effort names and endpoint family from the model page"
+      }
+    },
+    "prompt_caching": {
+      "openrouter": {
+        "status": "documented_but_conditional",
+        "details": "provider prompt caching and OpenRouter response caching are separate; response caching is enabled by headers/presets and has endpoint/TTL rules",
+        "migration": "remove cache headers unless the destination documents equivalent semantics"
+      },
+      "argolink": {
+        "status": "not_universal",
+        "details": "no universal OpenRouter-compatible cache header contract is claimed in the checked model catalog",
+        "migration": "use only the destination model's documented cached-token fields"
+      }
+    },
+    "transforms": {
+      "openrouter": {
+        "status": "documented",
+        "details": "message transforms include context-compression plugins that change the input before routing",
+        "migration": "normalize or truncate explicitly in the client and record the change"
+      },
+      "argolink": {
+        "status": "not_claimed",
+        "details": "no equivalent universal transform parameter is listed",
+        "migration": "send the model's documented input shape without OpenRouter-only plugin fields"
+      }
+    },
+    "video": {
+      "openrouter": {
+        "status": "documented_async",
+        "submit": "POST /api/v1/videos",
+        "status_route": "GET /api/v1/videos/{job_id}",
+        "content_route": "GET /api/v1/videos/{job_id}/content",
+        "migration": "map the request fields and provider-documented status values; do not reuse a chat body"
+      },
+      "argolink": {
+        "status": "documented_async",
+        "submit": "POST /v1/videos/generations",
+        "status_route": "GET /v1/videos/{request_id}",
+        "content_route": "GET /v1/videos/{request_id}/content",
+        "status_values": ["pending", "done", "failed", "expired"],
+        "migration": "map model-specific limits and persist request_id before polling"
+      }
+    },
+    "usage": {
+      "openrouter": {
+        "status": "metadata_varies",
+        "details": "provider/model response metadata and cached usage fields must be read from the response"
+      },
+      "argolink": {
+        "status": "model_dependent",
+        "details": "record the response usage schema and effective catalog unit for the selected model"
+      }
+    }
+  }
+}
